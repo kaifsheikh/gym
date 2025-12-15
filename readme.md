@@ -1,72 +1,71 @@
-# Database Section:
+# Card ki Info
+muje apne gym ka liya aik database ki tables create karna hai kch is terha ka
 
-## All Tables 
+Muscle: Chest
+SubCategory ka andar oiska Head: Upper Chest or oiski Images bhe ho
+
+Exercise Name: Inline Dumbbell Press
+Equipment: Barbbell
+Time : 45 Minutes
+Rest Time: 2
+Calories Bearn : 300
+Difficulty: Advanced
+Sets and Rep: 4x12
+Ager Exercise ko Describe karna ho oiska bhe hona chaiya
+Video ka Link ka option bhe hona chaiya jaha video show ho
+
+is subka liya muje tables bana kardu mysql mein 
+
+## MYSQL Tables:
+
 ```sql
-create table workout_categories(
-	id int AUTO_INCREMENT PRIMARY KEY,
-    name varchar(100)
-)
-
-INSERT INTO workout_categories (name)
-VALUES ('Chest'), ('Back'), ('Legs');
-
----- 
-
-create table workout_subcategories(
-	id int PRIMARY KEY AUTO_INCREMENT,
-    category_id INT,
-    name varchar(100),
-    FOREIGN KEY (category_id) REFERENCES workout_categories(id)
-)
-
-insert into workout_subcategories(category_id , name)
-values
-(1, "Upper Chest"),
-(1, 'Middle Chest'),
-(1, 'Lower Chest');
-
-
-----
-
-CREATE TABLE workouts (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  category_id INT,
-  title VARCHAR(150),
-  difficulty VARCHAR(50),
-  minutes INT,
-  total_exercises INT,
-  calories INT,
-  FOREIGN KEY (category_id) REFERENCES workout_categories(id)
+-- 1️⃣ Muscles Table
+CREATE TABLE muscles (
+    muscle_id INT AUTO_INCREMENT PRIMARY KEY,
+    muscle_name VARCHAR(50) NOT NULL,
+    description TEXT
 );
 
+-- 2️⃣ SubCategories Table
+CREATE TABLE subcategories (
+    subcategory_id INT AUTO_INCREMENT PRIMARY KEY,
+    muscle_id INT NOT NULL,
+    subcategory_name VARCHAR(50) NOT NULL,
+    image_url VARCHAR(255),
+    description TEXT,
+    FOREIGN KEY (muscle_id) REFERENCES muscles(muscle_id) ON DELETE CASCADE
+);
 
-
-INSERT INTO workouts
-(category_id, title, difficulty, minutes, total_exercises, calories)
-VALUES
-(1, 'Chest Workout', 'Intermediate', 45, 5, 350);
-
-
-----
-
+-- 3️⃣ Exercises Table
 CREATE TABLE exercises (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  workout_id INT,
-  subcategory_id INT,
-  name VARCHAR(150),
-  equipment VARCHAR(100),
-  target VARCHAR(100),
-  sets VARCHAR(20),
-  slug VARCHAR(150),
-  FOREIGN KEY (workout_id) REFERENCES workouts(id),
-  FOREIGN KEY (subcategory_id) REFERENCES workout_subcategories(id)
+    exercise_id INT AUTO_INCREMENT PRIMARY KEY,
+    subcategory_id INT NOT NULL,
+    exercise_name VARCHAR(100) NOT NULL,
+    equipment VARCHAR(50),
+    time_minutes INT,
+    rest_time INT,
+    calories_burn INT,
+    difficulty ENUM('Beginner', 'Intermediate', 'Advanced') DEFAULT 'Beginner',
+    sets_reps VARCHAR(20),
+    description TEXT,
+    video_url VARCHAR(255),
+    FOREIGN KEY (subcategory_id) REFERENCES subcategories(subcategory_id) ON DELETE CASCADE
 );
 
+---
 
-INSERT INTO exercises
-(workout_id, subcategory_id, name, equipment, target, sets, slug)
-VALUES
-(1, 1, 'Bench Press', 'Barbell', 'Upper Chest', '4x10', 'bench-press'),
-(1, 1, 'Incline Dumbbell Press', 'Dumbbells', 'Upper Chest', '3x12', 'incline-dumbbell-press');
+-- Muscles
+INSERT INTO muscles (muscle_name, description) VALUES 
+('Chest', 'Chest muscles upper and lower parts include karte hain.');
+
+-- SubCategories
+INSERT INTO subcategories (muscle_id, subcategory_name, image_url, description) VALUES 
+(1, 'Upper Chest', 'https://example.com/upper-chest.jpg', 'Upper part of chest muscles.');
+
+-- Exercises
+INSERT INTO exercises 
+(subcategory_id, exercise_name, equipment, time_minutes, rest_time, calories_burn, difficulty, sets_reps, description, video_url)
+VALUES 
+(1, 'Inline Dumbbell Press', 'Barbell', 45, 2, 300, 'Advanced', '4x12', 'Press dumbbells inline for upper chest.', 'https://example.com/video.mp4');
 
 ```
