@@ -19,53 +19,37 @@ is subka liya muje tables bana kardu mysql mein
 ## MYSQL Tables:
 
 ```sql
--- 1️⃣ Muscles Table
 CREATE TABLE muscles (
     muscle_id INT AUTO_INCREMENT PRIMARY KEY,
     muscle_name VARCHAR(50) NOT NULL,
+    image_url VARCHAR(255),       -- Muscle main image
     description TEXT
 );
 
--- 2️⃣ SubCategories Table
-CREATE TABLE subcategories (
-    subcategory_id INT AUTO_INCREMENT PRIMARY KEY,
+
+CREATE TABLE muscle_heads (
+    head_id INT AUTO_INCREMENT PRIMARY KEY,
     muscle_id INT NOT NULL,
-    subcategory_name VARCHAR(50) NOT NULL,
-    image_url VARCHAR(255),
+    head_name VARCHAR(50) NOT NULL,   -- Specific head, e.g., "Upper Chest"
+    image_url VARCHAR(255),           -- Image for this specific head
     description TEXT,
     FOREIGN KEY (muscle_id) REFERENCES muscles(muscle_id) ON DELETE CASCADE
 );
 
--- 3️⃣ Exercises Table
+
 CREATE TABLE exercises (
     exercise_id INT AUTO_INCREMENT PRIMARY KEY,
-    subcategory_id INT NOT NULL,
+    head_id INT NOT NULL,                 -- Belongs to a specific muscle head
     exercise_name VARCHAR(100) NOT NULL,
     equipment VARCHAR(50),
+    sets_reps VARCHAR(20),
     time_minutes INT,
     rest_time INT,
     calories_burn INT,
-    difficulty ENUM('Beginner', 'Intermediate', 'Advanced') DEFAULT 'Beginner',
-    sets_reps VARCHAR(20),
+    difficulty ENUM('Beginner','Intermediate','Advanced') DEFAULT 'Beginner',
     description TEXT,
     video_url VARCHAR(255),
-    FOREIGN KEY (subcategory_id) REFERENCES subcategories(subcategory_id) ON DELETE CASCADE
+    FOREIGN KEY (head_id) REFERENCES muscle_heads(head_id) ON DELETE CASCADE
 );
-
----
-
--- Muscles
-INSERT INTO muscles (muscle_name, description) VALUES 
-('Chest', 'Chest muscles upper and lower parts include karte hain.');
-
--- SubCategories
-INSERT INTO subcategories (muscle_id, subcategory_name, image_url, description) VALUES 
-(1, 'Upper Chest', 'https://example.com/upper-chest.jpg', 'Upper part of chest muscles.');
-
--- Exercises
-INSERT INTO exercises 
-(subcategory_id, exercise_name, equipment, time_minutes, rest_time, calories_burn, difficulty, sets_reps, description, video_url)
-VALUES 
-(1, 'Inline Dumbbell Press', 'Barbell', 45, 2, 300, 'Advanced', '4x12', 'Press dumbbells inline for upper chest.', 'https://example.com/video.mp4');
 
 ```
