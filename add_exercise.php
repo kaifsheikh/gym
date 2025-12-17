@@ -7,19 +7,18 @@ if (isset($_POST['add_muscle'])) {
     // It's highly recommended to use prepared statements to prevent SQL injection
     $muscle_name = mysqli_real_escape_string($conn, $_POST['muscle_name']);
     $description = mysqli_real_escape_string($conn, $_POST['muscle_desc']);
-    // $muscle_name = $_POST['muscle_name'];
-    // $description = $_POST['muscle_desc'];
 
     // Basic file validation and sanitization is also recommended
     $image = $_FILES['muscle_image']['name'];
     $tmp  = $_FILES['muscle_image']['tmp_name'];
-    
+
     // Create a unique filename to prevent overwrites
     $unique_image_name = time() . '_' . basename($image);
     $upload_path = "uploads/" . $unique_image_name;
 
     if (move_uploaded_file($tmp, $upload_path)) {
-        mysqli_query($conn,
+        mysqli_query(
+            $conn,
             "INSERT INTO muscles (muscle_name,image_url,description)
              VALUES ('$muscle_name','$unique_image_name','$description')"
         );
@@ -34,9 +33,7 @@ if (isset($_POST['add_head'])) {
     $muscle_id = mysqli_real_escape_string($conn, $_POST['muscle_id']);
     $head_name = mysqli_real_escape_string($conn, $_POST['head_name']);
     $description = mysqli_real_escape_string($conn, $_POST['head_desc']);
-    // $muscle_id = $_POST['muscle_id'];
-    // $head_name = $_POST['head_name'];
-    // $description = $_POST['head_desc'];
+
 
     $image = $_FILES['head_image']['name'];
     $tmp  = $_FILES['head_image']['tmp_name'];
@@ -45,7 +42,8 @@ if (isset($_POST['add_head'])) {
     $upload_path = "uploads/" . $unique_image_name;
 
     if (move_uploaded_file($tmp, $upload_path)) {
-        mysqli_query($conn,
+        mysqli_query(
+            $conn,
             "INSERT INTO muscle_heads (muscle_id,head_name,image_url,description)
              VALUES ('$muscle_id','$head_name','$unique_image_name','$description')"
         );
@@ -56,32 +54,34 @@ if (isset($_POST['add_head'])) {
 
 /* ================= ADD EXERCISE ================= */
 if (isset($_POST['add_exercise'])) {
-    // It's highly recommended to use prepared statements here as well
-    $head_id = $_POST['head_id'];
-    $name = $_POST['exercise_name'];
-    $equipment = $_POST['equipment'];
-    $sets_reps = $_POST['sets_reps'];
-    $time = $_POST['time_minutes'];
-    $rest = $_POST['rest_time'];
-    $calories = $_POST['calories_burn'];
-    $difficulty = $_POST['difficulty'];
-    $description = $_POST['exercise_desc'];
-    $video = $_POST['video_url'];
 
-    mysqli_query($conn,
-        "INSERT INTO exercises
-        (head_id,exercise_name,equipment,sets_reps,time_minutes,rest_time,calories_burn,difficulty,description,video_url)
+    $head_id     = mysqli_real_escape_string($conn, $_POST['head_id']);
+    $name        = mysqli_real_escape_string($conn, $_POST['exercise_name']);
+    $equipment   = mysqli_real_escape_string($conn, $_POST['equipment']);
+    $sets_reps   = mysqli_real_escape_string($conn, $_POST['sets_reps']);
+    $difficulty  = mysqli_real_escape_string($conn, $_POST['difficulty']);
+    $description = mysqli_real_escape_string($conn, $_POST['exercise_desc']);
+
+    $sql = "
+        INSERT INTO exercises
+        (head_id, exercise_name, equipment, sets_reps, difficulty, description)
         VALUES
-        ('$head_id','$name','$equipment','$sets_reps','$time','$rest','$calories','$difficulty','$description','$video')"
-    );
+        ('$head_id', '$name', '$equipment', '$sets_reps', '$difficulty', '$description')
+    ";
+
+    if (!mysqli_query($conn, $sql)) {
+        die("Exercise Insert Error: " . mysqli_error($conn));
+    }
+
     header("Location: " . $_SERVER['PHP_SELF']);
     exit();
 }
 
-/* ================= FETCH DATA ================= */
- $muscles = mysqli_query($conn, "SELECT * FROM muscles");
 
- $heads = mysqli_query($conn, "
+/* ================= FETCH DATA ================= */
+$muscles = mysqli_query($conn, "SELECT * FROM muscles");
+
+$heads = mysqli_query($conn, "
     SELECT 
         muscle_heads.head_id,
         muscle_heads.head_name,
@@ -94,6 +94,7 @@ if (isset($_POST['add_exercise'])) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -251,7 +252,6 @@ if (isset($_POST['add_exercise'])) {
             font-size: 2rem;
         }
 
-        /* --- Form Element Styling --- */
         .form-group {
             margin-bottom: 20px;
         }
@@ -286,13 +286,12 @@ if (isset($_POST['add_exercise'])) {
             box-shadow: 0 0 8px rgba(233, 69, 96, 0.3);
             background-color: rgba(26, 26, 46, 0.8);
         }
-        
+
         textarea {
             resize: vertical;
             min-height: 100px;
         }
 
-        /* --- Custom File Upload Button --- */
         .file-input-wrapper {
             position: relative;
             overflow: hidden;
@@ -316,7 +315,7 @@ if (isset($_POST['add_exercise'])) {
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        
+
         .file-input-label:hover {
             background-color: rgba(233, 69, 96, 0.1);
         }
@@ -325,7 +324,6 @@ if (isset($_POST['add_exercise'])) {
             margin-right: 10px;
         }
 
-        /* --- Button Styling --- */
         .btn {
             display: inline-block;
             background: linear-gradient(45deg, var(--accent-color), var(--accent-hover));
@@ -364,7 +362,6 @@ if (isset($_POST['add_exercise'])) {
             box-shadow: 0 5px 15px rgba(233, 69, 96, 0.4);
         }
 
-        /* --- Form Row for Responsive Layout --- */
         .form-row {
             display: flex;
             flex-wrap: wrap;
@@ -377,7 +374,6 @@ if (isset($_POST['add_exercise'])) {
             padding: 0 10px;
         }
 
-        /* --- Success Message --- */
         .success-message {
             background-color: rgba(76, 175, 80, 0.2);
             border-left: 4px solid var(--success-color);
@@ -398,6 +394,7 @@ if (isset($_POST['add_exercise'])) {
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -409,6 +406,7 @@ if (isset($_POST['add_exercise'])) {
                 opacity: 0;
                 max-height: 0;
             }
+
             to {
                 opacity: 1;
                 max-height: 100px;
@@ -463,10 +461,13 @@ if (isset($_POST['add_exercise'])) {
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="loading" id="loading">
         <div class="loading-spinner"></div>
@@ -511,7 +512,7 @@ if (isset($_POST['add_exercise'])) {
                                     <label for="muscle_image" class="file-input-label">
                                         <i class="fas fa-cloud-upload-alt"></i> Choose File...
                                     </label>
-                                    <input type="file" id="muscle_image" name="muscle_image" required onchange="this.previousElementSibling.innerHTML = '<i class=\"fas fa-file-image\"></i> ' + this.files[0].name">
+                                    <input type="file" id="muscle_image" name="muscle_image" required onchange="this.previousElementSibling.innerHTML = '<i class=\" fas fa-file-image\"></i> ' + this.files[0].name">
                                 </div>
                             </div>
                         </div>
@@ -538,9 +539,9 @@ if (isset($_POST['add_exercise'])) {
                                 <label for="muscle_id">Select Muscle</label>
                                 <select id="muscle_id" name="muscle_id" required>
                                     <option value="" disabled selected>Select a Muscle...</option>
-                                    <?php 
+                                    <?php
                                     // Reset the pointer for the muscles result set to the beginning
-                                    mysqli_data_seek($muscles, 0); 
+                                    mysqli_data_seek($muscles, 0);
                                     while ($m = mysqli_fetch_assoc($muscles)) { ?>
                                         <option value="<?php echo $m['muscle_id']; ?>">
                                             <?php echo htmlspecialchars($m['muscle_name']); ?>
@@ -562,7 +563,7 @@ if (isset($_POST['add_exercise'])) {
                             <label for="head_image" class="file-input-label">
                                 <i class="fas fa-cloud-upload-alt"></i> Choose File...
                             </label>
-                            <input type="file" id="head_image" name="head_image" required onchange="this.previousElementSibling.innerHTML = '<i class=\"fas fa-file-image\"></i> ' + this.files[0].name">
+                            <input type="file" id="head_image" name="head_image" required onchange="this.previousElementSibling.innerHTML = '<i class=\" fas fa-file-image\"></i> ' + this.files[0].name">
                         </div>
                     </div>
                     <div class="form-group">
@@ -587,7 +588,7 @@ if (isset($_POST['add_exercise'])) {
                                 <label for="head_id">Select Muscle Head</label>
                                 <select id="head_id" name="head_id" required>
                                     <option value="" disabled selected>Select a Muscle Head...</option>
-                                    <?php 
+                                    <?php
                                     // Reset the pointer for the heads result set to the beginning
                                     mysqli_data_seek($heads, 0);
                                     while ($h = mysqli_fetch_assoc($heads)) { ?>
@@ -630,34 +631,11 @@ if (isset($_POST['add_exercise'])) {
                                 <input type="text" id="sets_reps" name="sets_reps" placeholder="e.g., 3 x 12">
                             </div>
                         </div>
-                        <div class="form-col">
-                            <div class="form-group">
-                                <label for="time_minutes">Time (minutes)</label>
-                                <input type="number" id="time_minutes" name="time_minutes" placeholder="e.g., 5">
-                            </div>
-                        </div>
                     </div>
-                    <div class="form-row">
-                        <div class="form-col">
-                            <div class="form-group">
-                                <label for="rest_time">Rest Time (seconds)</label>
-                                <input type="number" id="rest_time" name="rest_time" placeholder="e.g., 60">
-                            </div>
-                        </div>
-                        <div class="form-col">
-                            <div class="form-group">
-                                <label for="calories_burn">Calories Burn</label>
-                                <input type="number" id="calories_burn" name="calories_burn" placeholder="e.g., 50">
-                            </div>
-                        </div>
-                    </div>
+
                     <div class="form-group">
                         <label for="exercise_desc">Exercise Description</label>
                         <textarea id="exercise_desc" name="exercise_desc" placeholder="Describe how to perform the exercise..."></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="video_url">Video URL</label>
-                        <input type="text" id="video_url" name="video_url" placeholder="e.g., https://www.youtube.com/watch?v=...">
                     </div>
                     <button type="submit" name="add_exercise" class="btn">
                         <i class="fas fa-save"></i> Add Exercise
@@ -672,32 +650,32 @@ if (isset($_POST['add_exercise'])) {
         document.addEventListener('DOMContentLoaded', function() {
             const tabs = document.querySelectorAll('.nav-tab');
             const forms = document.querySelectorAll('.form-container');
-            
+
             tabs.forEach(tab => {
                 tab.addEventListener('click', function() {
                     // Remove active class from all tabs and forms
                     tabs.forEach(t => t.classList.remove('active'));
                     forms.forEach(f => f.classList.remove('active'));
-                    
+
                     // Add active class to clicked tab and corresponding form
                     this.classList.add('active');
                     const tabId = this.getAttribute('data-tab');
                     document.getElementById(tabId).classList.add('active');
                 });
             });
-            
+
             // Form submission handling
             const formsElements = document.querySelectorAll('form');
             formsElements.forEach(form => {
                 form.addEventListener('submit', function() {
                     // Show loading spinner
                     document.getElementById('loading').style.display = 'flex';
-                    
+
                     // Simulate form submission (in a real app, this would be handled by the server)
                     setTimeout(() => {
                         document.getElementById('loading').style.display = 'none';
                         document.getElementById('success-message').classList.add('show');
-                        
+
                         // Hide success message after 3 seconds
                         setTimeout(() => {
                             document.getElementById('success-message').classList.remove('show');
@@ -708,4 +686,5 @@ if (isset($_POST['add_exercise'])) {
         });
     </script>
 </body>
+
 </html>

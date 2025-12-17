@@ -41,6 +41,8 @@ if (window.innerWidth > 768) sidebar.classList.remove("collapsed");
 
 
 
+
+
 // Exercise Modal Functions
 function openExerciseModal(exerciseId) {
 
@@ -49,7 +51,7 @@ function openExerciseModal(exerciseId) {
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
 
-    // DB se data fetch karo
+    // Fetch exercise data
     fetch("fetch_exercise.php?id=" + exerciseId)
         .then(res => res.json())
         .then(d => {
@@ -63,19 +65,19 @@ function openExerciseModal(exerciseId) {
             // Image
             document.getElementById('modalHeadImage').src = "./uploads/" + d.image_url;
 
-            // Tags
+            // Equipment
             document.getElementById('tagEquipment').innerHTML =
                 `<span class="material-symbols-rounded">fitness_center</span> ${d.equipment}`;
 
+            // Muscle + Head
             document.getElementById('tagMuscle').innerHTML =
                 `<span class="material-symbols-rounded">local_fire_department</span> ${d.muscle_name} – ${d.head_name}`;
 
+            // Difficulty
             document.getElementById('tagLevel').innerHTML =
                 `<span class="material-symbols-rounded">signal_cellular_alt</span> ${d.difficulty}`;
-
-            document.getElementById('tagTime').innerHTML =
-                `<span class="material-symbols-rounded">timer</span> ${d.time_minutes} mins`;
-        });
+        })
+        .catch(err => console.error("Exercise Fetch Error:", err));
 }
 
 // Close modal

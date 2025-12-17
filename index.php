@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sidebar Menu | CodingNepal</title>
     <!-- CSS -->
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="./css/style.css" />
     
     <!-- JS -->
-    <script src="script.js" defer></script>
+    <script src="./js/script.js" defer></script>
 
     <!-- Linking Google fonts for icons -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
@@ -80,50 +80,57 @@
             <p class="card">Choose from our targeted workout plans for specific muscle groups. Each plan includes exercises with sets and reps to help you achieve your fitness goals.</p>
 
 
-            <?php
-            include "./config/db.php";
+<?php
+include "./config/db.php";
 
-            $query = "
-            SELECT 
-            m.muscle_name,
-            mh.head_id,
-            mh.head_name,
-            e.exercise_id,
-            e.exercise_name,
-            e.equipment,
-            e.sets_reps,
-            e.time_minutes,
-            e.calories_burn,
-            e.difficulty
-        FROM muscle_heads mh
-        JOIN muscles m ON m.muscle_id = mh.muscle_id
-        JOIN exercises e ON e.head_id = mh.head_id
-        ORDER BY m.muscle_name, mh.head_name
-        ";
+$query = "
+    SELECT 
+        m.muscle_name,
+        mh.head_id,
+        mh.head_name,
+        e.exercise_id,
+        e.exercise_name,
+        e.equipment,
+        e.sets_reps,
+        e.difficulty
+    FROM muscle_heads mh
+    INNER JOIN muscles m ON m.muscle_id = mh.muscle_id
+    INNER JOIN exercises e ON e.head_id = mh.head_id
+    ORDER BY m.muscle_name, mh.head_name
+";
 
-            $result = mysqli_query($conn, $query);
-            $cards = [];
-            while ($row = mysqli_fetch_assoc($result)) {
-            $cardKey = $row['muscle_name'] . ' - ' . $row['head_name'];
+$result = mysqli_query($conn, $query);
 
-                if (!isset($cards[$cardKey])) {
-                    $cards[$cardKey] = [
-                        'muscle' => $row['muscle_name'],
-                        'head' => $row['head_name'],
-                        'difficulty' => $row['difficulty'],
-                        'minutes' => 0,
-                        'calories' => 0,
-                        'exercises' => []
-                    ];
-                }
+// 🔴 Query failure handling
+if (!$result) {
+    die("Database Query Failed: " . mysqli_error($conn));
+}
 
-                $cards[$cardKey]['minutes'] += (int)$row['time_minutes'];
-                $cards[$cardKey]['calories'] += (int)$row['calories_burn'];
+$cards = [];
 
-                $cards[$cardKey]['exercises'][] = $row;
-            }
+while ($row = mysqli_fetch_assoc($result)) {
 
-        ?>
+    $cardKey = $row['muscle_name'] . ' - ' . $row['head_name'];
+
+    if (!isset($cards[$cardKey])) {
+        $cards[$cardKey] = [
+            'muscle'     => $row['muscle_name'],
+            'head'       => $row['head_name'],
+            'difficulty' => $row['difficulty'],
+            'exercises'  => []
+        ];
+    }
+
+    $cards[$cardKey]['exercises'][] = [
+        'exercise_id'   => $row['exercise_id'],
+        'exercise_name' => $row['exercise_name'],
+        'equipment'     => $row['equipment'],
+        'sets_reps'     => $row['sets_reps'],
+        'difficulty'    => $row['difficulty']
+    ];
+}
+?>
+
 
             <div class="workout-grid">
                 <?php foreach ($cards as $card) { ?>
@@ -140,21 +147,6 @@
                                 <span class="difficulty-badge difficulty-<?php echo strtolower($card['difficulty']); ?>">
                                     <?php echo $card['difficulty']; ?>
                                 </span>
-                            </div>
-                        </div>
-
-                        <div class="workout-meta">
-                            <div class="meta-item">
-                                <div class="meta-value"><?php echo $card['minutes']; ?></div>
-                                <div class="meta-label">Minutes</div>
-                            </div>
-                            <div class="meta-item">
-                                <div class="meta-value"><?php echo count($card['exercises']); ?></div>
-                                <div class="meta-label">Rest</div>
-                            </div>
-                            <div class="meta-item">
-                                <div class="meta-value"><?php echo $card['calories']; ?></div>
-                                <div class="meta-label">Calories</div>
                             </div>
                         </div>
 
@@ -215,11 +207,6 @@
                             <span class="material-symbols-rounded" style="font-size: 20px;">signal_cellular_alt</span>
                             <!-- Intermediate -->
                         </span>
-                        
-                        <span class="exercise-tag" id="tagTime">
-                            <span class="material-symbols-rounded" style="font-size: 20px;">timer</span>
-                            <!-- 45 mins -->
-                        </span>
 
                     </div>
 
@@ -236,10 +223,6 @@
                     </h3>
                     <ul class="instruction-list">
                         <li class="instruction-item">
-                            <span class="instruction-number">1</span>
-                            <span class="instruction-text">Lie on your back on a flat bench with your feet flat on the floor. Grip the barbell with hands slightly wider than shoulder-width apart, ensuring your wrists are straight.</span>
-                        </li>
-                        <li class="instruction-item">
                             <span class="instruction-number">2</span>
                             <span class="instruction-text">Unrack the weight with straight arms, holding it above your chest with arms locked. Keep your shoulder blades retracted and depressed throughout the movement.</span>
                         </li>
@@ -247,14 +230,7 @@
                             <span class="instruction-number">3</span>
                             <span class="instruction-text">Lower the bar slowly to your mid-chest while inhaling, keeping elbows at about 45 degrees to your body. Control the descent for 2-3 seconds.</span>
                         </li>
-                        <li class="instruction-item">
-                            <span class="instruction-number">4</span>
-                            <span class="instruction-text">Push the bar back up to the starting position while exhaling, focusing on squeezing your chest muscles at the top. Drive through your chest and keep your back flat.</span>
-                        </li>
-                        <li class="instruction-item">
-                            <span class="instruction-number">5</span>
-                            <span class="instruction-text">Repeat for the desired number of repetitions, maintaining proper form throughout. Focus on mind-muscle connection with your chest.</span>
-                        </li>
+                    
                     </ul>
                 </div>
 

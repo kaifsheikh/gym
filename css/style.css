@@ -373,21 +373,6 @@ body.dark-theme .theme-toggle-indicator {
         border-radius: 8px;
       }
       
-      .meta-item {
-        text-align: center;
-      }
-      
-      .meta-value {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: var(--primary-color, #4f46e5);
-      }
-      
-      .meta-label {
-        font-size: 0.75rem;
-        color: var(--text-light, #666);
-      }
-      
       .exercise-list {
         margin: 15px 0;
       }
