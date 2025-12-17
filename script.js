@@ -42,106 +42,61 @@ if (window.innerWidth > 768) sidebar.classList.remove("collapsed");
 
 
 // Exercise Modal Functions
-      let currentSlideIndex = 1;
-      
-      function openExerciseModal(exerciseId) {
-        document.getElementById('exerciseModal').classList.add('active');
-        document.body.style.overflow = 'hidden';
-        
-        // Update exercise title based on exercise ID
-        const exerciseTitles = {
-          'bench-press': 'Bench Press',
-          'incline-dumbbell-press': 'Incline Dumbbell Press',
-          'cable-flyes': 'Cable Flyes',
-          'push-ups': 'Push-ups',
-          'dips': 'Dips',
-          'barbell-curls': 'Barbell Curls',
-          'hammer-curls': 'Hammer Curls',
-          'concentration-curls': 'Concentration Curls',
-          'preacher-curls': 'Preacher Curls',
-          'tricep-pushdowns': 'Tricep Pushdowns',
-          'skull-crushers': 'Skull Crushers',
-          'overhead-extensions': 'Overhead Extensions',
-          'diamond-push-ups': 'Diamond Push-ups',
-          'tricep-dips': 'Tricep Dips',
-          'overhead-press': 'Overhead Press',
-          'lateral-raises': 'Lateral Raises',
-          'face-pulls': 'Face Pulls',
-          'front-raises': 'Front Raises',
-          'shrugs': 'Shrugs',
-          'deadlifts': 'Deadlifts',
-          'pull-ups': 'Pull-ups',
-          'bent-over-rows': 'Bent Over Rows',
-          'lat-pulldowns': 'Lat Pulldowns',
-          'seated-cable-rows': 'Seated Cable Rows',
-          'hyperextensions': 'Hyperextensions',
-          'squats': 'Squats',
-          'leg-press': 'Leg Press',
-          'romanian-deadlifts': 'Romanian Deadlifts',
-          'leg-curls': 'Leg Curls',
-          'calf-raises': 'Calf Raises',
-          'walking-lunges': 'Walking Lunges',
-          'crunches': 'Crunches',
-          'leg-raises': 'Leg Raises',
-          'russian-twists': 'Russian Twists',
-          'plank': 'Plank',
-          'bicycle-crunches': 'Bicycle Crunches'
-        };
-        
-        document.getElementById('exerciseTitle').textContent = exerciseTitles[exerciseId] || 'Exercise';
-        showSlide(1);
-      }
-      
-      function closeExerciseModal() {
-        document.getElementById('exerciseModal').classList.remove('active');
-        document.body.style.overflow = 'auto';
-      }
-      
-      function changeSlide(direction) {
-        showSlide(currentSlideIndex += direction);
-      }
-      
-      function currentSlide(n) {
-        showSlide(currentSlideIndex = n);
-      }
-      
-      function showSlide(n) {
-        const slides = document.getElementsByClassName('carousel-slide');
-        const dots = document.getElementsByClassName('carousel-dot');
-        
-        if (n > slides.length) { currentSlideIndex = 1 }
-        if (n < 1) { currentSlideIndex = slides.length }
-        
-        for (let i = 0; i < slides.length; i++) {
-          slides[i].classList.remove('active');
-        }
-        
-        for (let i = 0; i < dots.length; i++) {
-          dots[i].classList.remove('active');
-        }
-        
-        slides[currentSlideIndex - 1].classList.add('active');
-        dots[currentSlideIndex - 1].classList.add('active');
-      }
-      
-      // Close modal when clicking outside
-      window.onclick = function(event) {
-        const modal = document.getElementById('exerciseModal');
-        if (event.target == modal) {
-          closeExerciseModal();
-        }
-      }
-      
-      // Keyboard navigation for carousel
-      document.addEventListener('keydown', function(event) {
-        const modal = document.getElementById('exerciseModal');
-        if (modal.classList.contains('active')) {
-          if (event.key === 'ArrowLeft') {
-            changeSlide(-1);
-          } else if (event.key === 'ArrowRight') {
-            changeSlide(1);
-          } else if (event.key === 'Escape') {
-            closeExerciseModal();
-          }
-        }
-      });
+function openExerciseModal(exerciseId) {
+
+    // Modal open
+    const modal = document.getElementById('exerciseModal');
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+
+    // DB se data fetch karo
+    fetch("fetch_exercise.php?id=" + exerciseId)
+        .then(res => res.json())
+        .then(d => {
+
+            // Title
+            document.getElementById('exerciseTitle').innerText = d.exercise_name;
+
+            // Description (muscle head)
+            document.getElementById('modalDescription').innerText = d.description;
+
+            // Image
+            document.getElementById('modalHeadImage').src = "./uploads/" + d.image_url;
+
+            // Tags
+            document.getElementById('tagEquipment').innerHTML =
+                `<span class="material-symbols-rounded">fitness_center</span> ${d.equipment}`;
+
+            document.getElementById('tagMuscle').innerHTML =
+                `<span class="material-symbols-rounded">local_fire_department</span> ${d.muscle_name} – ${d.head_name}`;
+
+            document.getElementById('tagLevel').innerHTML =
+                `<span class="material-symbols-rounded">signal_cellular_alt</span> ${d.difficulty}`;
+
+            document.getElementById('tagTime').innerHTML =
+                `<span class="material-symbols-rounded">timer</span> ${d.time_minutes} mins`;
+        });
+}
+
+// Close modal
+function closeExerciseModal() {
+    const modal = document.getElementById('exerciseModal');
+    modal.classList.remove('active');
+    document.body.style.overflow = 'auto';
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('exerciseModal');
+    if (event.target === modal) {
+        closeExerciseModal();
+    }
+};
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(event) {
+    const modal = document.getElementById('exerciseModal');
+    if (modal.classList.contains('active') && event.key === 'Escape') {
+        closeExerciseModal();
+    }
+});

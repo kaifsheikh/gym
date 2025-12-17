@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sidebar Menu | CodingNepal</title>
+    <!-- CSS -->
     <link rel="stylesheet" href="style.css" />
+    
+    <!-- JS -->
+    <script src="script.js" defer></script>
+
     <!-- Linking Google fonts for icons -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
 
 </head>
-
 <body>
     <!-- Navbar -->
     <nav class="site-nav">
@@ -19,6 +22,7 @@
         </button>
     </nav>
 
+    <!-- Container -->
     <div class="container">
         <!-- Sidebar -->
         <aside class="sidebar collapsed">
@@ -80,31 +84,27 @@
             include "./config/db.php";
 
             $query = "
-SELECT 
-    m.muscle_name,
-    mh.head_id,
-    mh.head_name,
-    e.exercise_id,
-    e.exercise_name,
-    e.equipment,
-    e.sets_reps,
-    e.time_minutes,
-    e.calories_burn,
-    e.difficulty
-FROM muscle_heads mh
-JOIN muscles m ON m.muscle_id = mh.muscle_id
-JOIN exercises e ON e.head_id = mh.head_id
-ORDER BY m.muscle_name, mh.head_name
-";
+            SELECT 
+            m.muscle_name,
+            mh.head_id,
+            mh.head_name,
+            e.exercise_id,
+            e.exercise_name,
+            e.equipment,
+            e.sets_reps,
+            e.time_minutes,
+            e.calories_burn,
+            e.difficulty
+        FROM muscle_heads mh
+        JOIN muscles m ON m.muscle_id = mh.muscle_id
+        JOIN exercises e ON e.head_id = mh.head_id
+        ORDER BY m.muscle_name, mh.head_name
+        ";
 
             $result = mysqli_query($conn, $query);
-
-
             $cards = [];
-
             while ($row = mysqli_fetch_assoc($result)) {
-
-                $cardKey = $row['muscle_name'] . ' - ' . $row['head_name'];
+            $cardKey = $row['muscle_name'] . ' - ' . $row['head_name'];
 
                 if (!isset($cards[$cardKey])) {
                     $cards[$cardKey] = [
@@ -123,13 +123,10 @@ ORDER BY m.muscle_name, mh.head_name
                 $cards[$cardKey]['exercises'][] = $row;
             }
 
-
-            ?>
+        ?>
 
             <div class="workout-grid">
-
                 <?php foreach ($cards as $card) { ?>
-
                     <div class="workout-card">
 
                         <div class="workout-header">
@@ -175,17 +172,15 @@ ORDER BY m.muscle_name, mh.head_name
                                 </div>
                             <?php } ?>
                         </div>
-
                     </div>
 
                 <?php } ?>
 
             </div>
-
         </div>
     </div>
 
-    <!-- Enhanced Exercise Detail Modal -->
+    <!-- Modal Box / Detial Page -->
     <div id="exerciseModal" class="exercise-modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -193,29 +188,6 @@ ORDER BY m.muscle_name, mh.head_name
                     <div class="carousel-slide active">
                         <img src="" id="modalHeadImage" alt="Exercise Step 1">
                     </div>
-
-                    <!-- <div class="carousel-slide">
-                        <img src="https://picsum.photos/seed/exercise2/1200/350.jpg" alt="Exercise Step 2">
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="https://picsum.photos/seed/exercise3/1200/350.jpg" alt="Exercise Step 3">
-                    </div>
-                    <div class="carousel-slide">
-                        <img src="https://picsum.photos/seed/exercise4/1200/350.jpg" alt="Exercise Step 4">
-                    </div>
-                    <button class="carousel-nav carousel-prev" onclick="changeSlide(-1)">
-                        <span class="material-symbols-rounded">chevron_left</span>
-                    </button>
-                    <button class="carousel-nav carousel-next" onclick="changeSlide(1)">
-                        <span class="material-symbols-rounded">chevron_right</span>
-                    </button>
-                    <div class="carousel-controls">
-                        <span class="carousel-dot active" onclick="currentSlide(1)"></span>
-                        <span class="carousel-dot" onclick="currentSlide(2)"></span>
-                        <span class="carousel-dot" onclick="currentSlide(3)"></span>
-                        <span class="carousel-dot" onclick="currentSlide(4)"></span>
-                    </div> -->
-                
                 </div>
                 <button class="modal-close" onclick="closeExerciseModal()">
                     <span class="material-symbols-rounded">close</span>
@@ -224,32 +196,36 @@ ORDER BY m.muscle_name, mh.head_name
 
             <div class="modal-body">
                 <div class="exercise-title-section">
-                    <h2 class="exercise-main-title" id="exerciseTitle">Bench Press</h2>
+                    <h2 class="exercise-main-title" id="exerciseTitle">
+                        <!-- muscle -->
+                    </h2>
                     <div class="exercise-subtitle">
 
                         <span class="exercise-tag" id="tagEquipment">
                             <span class="material-symbols-rounded" style="font-size: 20px;">fitness_center</span>
-                            Barbell
+                            <!-- Barbell -->
                         </span>
                        
                         <span class="exercise-tag" id="tagMuscle">
                             <span class="material-symbols-rounded" style="font-size: 20px;">local_fire_department</span>
-                            Chest
+                            <!-- Chest -->
                         </span>
                         
                         <span class="exercise-tag" id="tagLevel">
                             <span class="material-symbols-rounded" style="font-size: 20px;">signal_cellular_alt</span>
-                            Intermediate
+                            <!-- Intermediate -->
                         </span>
                         
                         <span class="exercise-tag" id="tagTime">
                             <span class="material-symbols-rounded" style="font-size: 20px;">timer</span>
-                            45 mins
+                            <!-- 45 mins -->
                         </span>
 
                     </div>
 
-                    <p class="exercise-description" id="modalDescription"> ... </p>
+                <p class="exercise-description" id="modalDescription"> 
+                    <!-- description -->
+                </p>
                 </div>
 
 
@@ -282,47 +258,8 @@ ORDER BY m.muscle_name, mh.head_name
                     </ul>
                 </div>
 
-
-
-
             </div>
         </div>
     </div>
-
-    <script src="script.js"></script>
-
-<script>
-    function openExerciseModal(id) {
-
-    fetch("fetch_exercise.php?id=" + id)
-        .then(res => res.json())
-        .then(d => {
-
-            document.getElementById("exerciseTitle").innerText = d.exercise_name;
-            document.getElementById("modalDescription").innerText = d.description;
-
-            document.getElementById("modalHeadImage").src = d.image_url;
-
-            document.getElementById("tagEquipment").innerHTML =
-                `<span class="material-symbols-rounded">fitness_center</span> ${d.equipment}`;
-
-            document.getElementById("tagMuscle").innerHTML =
-                `<span class="material-symbols-rounded">local_fire_department</span> ${d.muscle_name} – ${d.head_name}`;
-
-            document.getElementById("tagLevel").innerHTML =
-                `<span class="material-symbols-rounded">signal_cellular_alt</span> ${d.difficulty}`;
-
-            document.getElementById("tagTime").innerHTML =
-                `<span class="material-symbols-rounded">timer</span> ${d.time_minutes} mins`;
-
-            document.getElementById("exerciseModal").classList.add("show");
-        });
-}
-
-function closeExerciseModal() {
-    document.getElementById("exerciseModal").classList.remove("show");
-}
-</script>
-
 </body>
 </html>
