@@ -1,217 +1,70 @@
-<!-- Is page ka Work Bilkul Done or Clear hai -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sidebar Menu | CodingNepal</title>
-    <!-- CSS -->
-    <link rel="stylesheet" href="./css/style.css" />
-    <!-- Linking Google fonts for icons -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+<?php
+include "./config/db.php";
 
-</head>
-<body>
 
-    <!-- Navbar Start -->
-    <?php
-    include "./config/db.php";
+/* ================= ADD MUSCLE ================= */
+if (isset($_POST['add_muscle'])) {
+    $muscle_name = mysqli_real_escape_string($conn, $_POST['muscle_name']);
 
-    $query = "
-                        SELECT 
-                            m.muscle_name,
-                            mh.head_id,
-                            mh.head_name,
-                            e.exercise_id,
-                            e.exercise_name,
-                            e.equipment,
-                            e.sets_reps,
-                            e.difficulty
-                        FROM muscle_heads mh
-                        INNER JOIN muscles m ON m.muscle_id = mh.muscle_id
-                        INNER JOIN exercises e ON e.head_id = mh.head_id
-                        ORDER BY m.muscle_name, mh.head_name
-                    ";
+    // Handle file upload
+    $image = $_FILES['muscle_image']['name'];
+    $tmp  = $_FILES['muscle_image']['tmp_name'];
+    $unique_image_name = time() . '_' . basename($image);
+    $upload_path = "uploads/" . $unique_image_name;
 
-    $result = mysqli_query($conn, $query);
-
-    // 🔴 Query failure handling
-    if (!$result) {
-        die("Database Query Failed: " . mysqli_error($conn));
+    if (move_uploaded_file($tmp, $upload_path)) {
+        mysqli_query(
+            $conn,
+            "INSERT INTO muscles (muscle_name, image_url) VALUES ('$muscle_name','$unique_image_name')"
+        );
+    } else {
+        // Handle file upload error if needed
+        die("Error uploading muscle image.");
     }
 
-    $cards = [];
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+}
 
-    while ($row = mysqli_fetch_assoc($result)) {
 
-        $cardKey = $row['muscle_name'] . ' - ' . $row['head_name'];
+/* ================= ADD MUSCLE HEAD ================= */
+if (isset($_POST['add_head'])) {
+    $muscle_id  = mysqli_real_escape_string($conn, $_POST['muscle_id']);
+    $head_name  = mysqli_real_escape_string($conn, $_POST['head_name']);
+    $description = mysqli_real_escape_string($conn, $_POST['head_desc']);
 
-        if (!isset($cards[$cardKey])) {
-            $cards[$cardKey] = [
-                'muscle'     => $row['muscle_name'],
-                'head'       => $row['head_name'],
-                'difficulty' => $row['difficulty'],
-                'exercises'  => []
-            ];
-        }
+    mysqli_query(
+        $conn,
+        "INSERT INTO muscle_heads (muscle_id, head_name, description) VALUES ('$muscle_id', '$head_name', '$description')"
+    );
 
-        $cards[$cardKey]['exercises'][] = [
-            'exercise_id'   => $row['exercise_id'],
-            'exercise_name' => $row['exercise_name'],
-            'equipment'     => $row['equipment'],
-            'sets_reps'     => $row['sets_reps'],
-            'difficulty'    => $row['difficulty']
-        ];
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+}
+
+
+/* ================= ADD EXERCISE ================= */
+if (isset($_POST['add_exercise'])) {
+    $head_id     = mysqli_real_escape_string($conn, $_POST['head_id']);
+    $name        = mysqli_real_escape_string($conn, $_POST['exercise_name']);
+    $equipment   = mysqli_real_escape_string($conn, $_POST['equipment']);
+    $sets_reps   = mysqli_real_escape_string($conn, $_POST['sets_reps']);
+    $difficulty  = mysqli_real_escape_string($conn, $_POST['difficulty']);
+
+    $sql = "INSERT INTO exercises (head_id, exercise_name, equipment, sets_reps, difficulty) VALUES ('$head_id', '$name', '$equipment', '$sets_reps', '$difficulty')";
+
+    if (!mysqli_query($conn, $sql)) {
+        die("Exercise Insert Error: " . mysqli_error($conn));
     }
-    ?>
 
-    <nav class="site-nav">
-        <button class="sidebar-toggle">
-            <span class="material-symbols-rounded">menu</span>
-        </button>
-    </nav>
-
-    <div class="container">
-        <aside class="sidebar collapsed">
-            <!-- Sidebar header -->
-            <div class="sidebar-header">
-                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTEDJIBa9cOKUUV31h-vF2UOx0DxP4H9Dfs4g&s" alt="CodingNepal" class="header-logo" />
-                <button class="sidebar-toggle">
-                    <span class="material-symbols-rounded">chevron_left</span>
-                </button>
-            </div>
-            <div class="sidebar-content">
-                <!-- Search Form -->
-                <form action="#" class="search-form">
-                    <span class="material-symbols-rounded">search</span>
-                    <input type="search" placeholder="Search..." required />
-                </form>
-                <!-- Sidebar Menu -->
-                <ul class="menu-list">
-                    <li class="menu-item">
-                        <a href="#" class="menu-link active">
-                            <span class="material-symbols-rounded">dashboard</span>
-                            <span class="menu-label">Dashboard</span>
-                        </a>
-                    </li>
+    header("Location: " . $_SERVER['PHP_SELF']);
+    exit();
+}
 
 
-                    <li class="menu-item">
-                        <a href="add_exercise.php" class="menu-link">
-                            <span class="material-symbols-rounded">exercise</span>
-                            <span class="menu-label">Add Exercise</span>
-                        </a>
-                    </li>
-
-
-                </ul>
-            </div>
-            <!-- Sidebar Footer -->
-            <div class="sidebar-footer">
-                <button class="theme-toggle">
-                    <div class="theme-label">
-                        <span class="theme-icon material-symbols-rounded">dark_mode</span>
-                        <span class="theme-text">Dark Mode</span>
-                    </div>
-                    <div class="theme-toggle-track">
-                        <div class="theme-toggle-indicator"></div>
-                    </div>
-                </button>
-            </div>
-        </aside>
-
-        <div class="main-content">
-            <h1 class="page-title">Workout Plans</h1>
-            <p class="card">Choose from our targeted workout plans for specific muscle groups. Each plan includes exercises with sets and reps to help you achieve your fitness goals.</p>
-
-            <div class="workout-grid">
-                <?php foreach ($cards as $card) { ?>
-                    <div class="workout-card">
-
-                        <div class="workout-header">
-                            <div class="workout-icon">
-                                <span class="material-symbols-rounded">fitness_center</span>
-                            </div>
-                            <div>
-                                <h3 class="workout-title">
-                                    <?php echo $card['muscle']; ?> – <?php echo $card['head']; ?>
-                                </h3>
-                                <span class="difficulty-badge difficulty-<?php echo strtolower($card['difficulty']); ?>">
-                                    <?php echo $card['difficulty']; ?>
-                                </span>
-                            </div>
-                        </div>
-
-                        <div class="exercise-list">
-                            <?php foreach ($card['exercises'] as $ex) { ?>
-                                <div class="exercise-item" onclick="openExerciseModal('<?php echo $ex['exercise_id']; ?>')">
-                                    <span class="material-symbols-rounded exercise-icon">arrow_right</span>
-                                    <div class="exercise-info">
-                                        <div class="exercise-name"><?php echo $ex['exercise_name']; ?></div>
-                                        <div class="exercise-details">
-                                            <?php echo $ex['equipment']; ?>
-                                        </div>
-                                    </div>
-                                    <span class="exercise-sets"><?php echo $ex['sets_reps']; ?></span>
-                                </div>
-                            <?php } ?>
-                        </div>
-                    </div>
-
-                <?php } ?>
-
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const sidebarToggleBtns = document.querySelectorAll(".sidebar-toggle");
-        const sidebar = document.querySelector(".sidebar");
-        const searchForm = document.querySelector(".search-form");
-        const themeToggleBtn = document.querySelector(".theme-toggle");
-        const themeIcon = themeToggleBtn.querySelector(".theme-icon");
-        const menuLinks = document.querySelectorAll(".menu-link");
-        // Updates the theme icon based on current theme and sidebar state
-        const updateThemeIcon = () => {
-            const isDark = document.body.classList.contains("dark-theme");
-            themeIcon.textContent = sidebar.classList.contains("collapsed") ? (isDark ? "light_mode" : "dark_mode") : "dark_mode";
-        };
-        // Apply dark theme if saved or system prefers, then update icon
-        const savedTheme = localStorage.getItem("theme");
-        const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-        const shouldUseDarkTheme = savedTheme === "dark" || (!savedTheme && systemPrefersDark);
-        document.body.classList.toggle("dark-theme", shouldUseDarkTheme);
-        updateThemeIcon();
-        // Toggle between themes on theme button click
-        themeToggleBtn.addEventListener("click", () => {
-            const isDark = document.body.classList.toggle("dark-theme");
-            localStorage.setItem("theme", isDark ? "dark" : "light");
-            updateThemeIcon();
-        });
-        // Toggle sidebar collapsed state on buttons click
-        sidebarToggleBtns.forEach((btn) => {
-            btn.addEventListener("click", () => {
-                sidebar.classList.toggle("collapsed");
-                updateThemeIcon();
-            });
-        });
-        // Expand the sidebar when the search form is clicked
-        searchForm.addEventListener("click", () => {
-            if (sidebar.classList.contains("collapsed")) {
-                sidebar.classList.remove("collapsed");
-                searchForm.querySelector("input").focus();
-            }
-        });
-        // Expand sidebar by default on large screens
-        if (window.innerWidth > 768) sidebar.classList.remove("collapsed");
-    </script>
-    <!-- Navbar End -->
-
-
-    <!-- Detial Page Start -->
-    <?php
-    include './config/db.php';
-    $exercise_id = 1;
+// --- AJAX LOGIC FOR MODAL ---
+if (isset($_GET['get_exercise_details'])) {
+    $exercise_id = intval($_GET['exercise_id']);
 
     $query = "
         SELECT 
@@ -230,97 +83,228 @@
     ";
 
     $result = mysqli_query($conn, $query);
-    if (!$result) die("Query Failed: " . mysqli_error($conn));
+    if (!$result) {
+        echo json_encode(['error' => 'Query Failed: ' . mysqli_error($conn)]);
+        exit();
+    }
 
     $data = mysqli_fetch_assoc($result);
-    ?>
+    echo json_encode($data);
+    exit();
+}
 
+
+// --- FETCH DATA FOR DISPLAY ---
+$muscles = mysqli_query($conn, "SELECT * FROM muscles");
+$heads = mysqli_query($conn, "SELECT mh.head_id, mh.head_name, m.muscle_name FROM muscle_heads mh INNER JOIN muscles m ON mh.muscle_id = m.muscle_id");
+
+// Fetch workout data for cards
+$query = "
+    SELECT 
+        m.muscle_name,
+        mh.head_id,
+        mh.head_name,
+        e.exercise_id,
+        e.exercise_name,
+        e.equipment,
+        e.sets_reps,
+        e.difficulty
+    FROM muscle_heads mh
+    INNER JOIN muscles m ON m.muscle_id = mh.muscle_id
+    INNER JOIN exercises e ON e.head_id = mh.head_id
+    ORDER BY m.muscle_name, mh.head_name
+";
+$result = mysqli_query($conn, $query);
+if (!$result) die("Database Query Failed: " . mysqli_error($conn));
+
+$cards = [];
+while ($row = mysqli_fetch_assoc($result)) {
+    $cardKey = $row['muscle_name'] . ' - ' . $row['head_name'];
+    if (!isset($cards[$cardKey])) {
+        $cards[$cardKey] = ['muscle' => $row['muscle_name'], 'head' => $row['head_name'], 'difficulty' => $row['difficulty'], 'exercises' => []];
+    }
+    $cards[$cardKey]['exercises'][] = ['exercise_id' => $row['exercise_id'], 'exercise_name' => $row['exercise_name'], 'equipment' => $row['equipment'], 'sets_reps' => $row['sets_reps']];
+}
+?>
+
+<?php include "./include/header.php" ?>
+<?php include "./include/navbar.php" ?>
+
+
+        <main class="main-content">
+            <div class="page-header">
+                <h1 class="page-title">Admin Panel</h1>
+                <p class="page-subtitle">Manage your gym database</p>
+            </div>
+
+            <div class="success-message" id="success-message"><i class="fas fa-check-circle"></i> Item      
+             added successfully!</div>
+
+            <div class="tabs">
+                <div class="tab active" data-tab="workout-view">Workout Plans</div>
+                <div class="tab" data-tab="muscle-form">Muscle</div>
+                <div class="tab" data-tab="head-form">Muscle Head</div>
+                <div class="tab" data-tab="exercise-form">Exercise</div>
+            </div>
+
+            <!-- WORKOUT VIEW -->
+            <div class="form-card active" id="workout-view">
+                <div class="form-header">
+                    <div class="form-icon"><i class="fas fa-th-large"></i></div>
+                    <h2 class="form-title">Workout Plans</h2>
+                </div>
+                <p class="page-subtitle">Choose from our targeted workout plans for specific muscle groups...</p>
+                <div class="workout-grid">
+                    <?php foreach ($cards as $card) { ?>
+                        <div class="workout-card">
+                            <div class="workout-header">
+                                <div class="workout-icon"><span class="material-symbols-rounded">fitness_center</span></div>
+                                <div>
+                                    <h3 class="workout-title"><?php echo htmlspecialchars($card['muscle']); ?> – <?php echo htmlspecialchars($card['head']); ?></h3>
+                                    <span class="difficulty-badge difficulty-<?php echo strtolower($card['difficulty']); ?>"><?php echo htmlspecialchars($card['difficulty']); ?></span>
+                                </div>
+                            </div>
+                            <div class="exercise-list">
+                                <?php foreach ($card['exercises'] as $ex) { ?>
+                                    <div class="exercise-item" onclick="openExerciseModal(<?php echo $ex['exercise_id']; ?>)">
+                                        <span class="material-symbols-rounded exercise-icon">arrow_right</span>
+                                        <div class="exercise-info">
+                                            <div class="exercise-name"><?php echo htmlspecialchars($ex['exercise_name']); ?></div>
+                                            <div class="exercise-details"><?php echo htmlspecialchars($ex['equipment']); ?></div>
+                                        </div>
+                                        <span class="exercise-sets"><?php echo htmlspecialchars($ex['sets_reps']); ?></span>
+                                    </div>
+                                <?php } ?>
+                            </div>
+                        </div>
+                    <?php } ?>
+                </div>
+            </div>
+
+            <!-- MUSCLE FORM -->
+            <div class="form-card" id="muscle-form">
+                <div class="form-header">
+                    <div class="form-icon"><i class="fas fa-user"></i></div>
+                    <h2 class="form-title">Add Muscle</h2>
+                </div>
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group"><label class="form-label" for="muscle_name">Muscle Name</label><input type="text" class="form-input" id="muscle_name" name="muscle_name" placeholder="e.g., Biceps Brachii" required></div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group"><label class="form-label" for="muscle_image">Muscle Image</label>
+                                <div class="file-upload"><input type="file" id="muscle_image" name="muscle_image" required><i class="fas fa-cloud-upload-alt file-upload-icon"></i><span class="file-upload-text">Choose file or drag here</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="submit" name="add_muscle" class="btn btn-block"><i class="fas fa-save"></i> Add Muscle</button>
+                </form>
+            </div>
+
+            <!-- MUSCLE HEAD FORM -->
+            <div class="form-card" id="head-form">
+                <div class="form-header">
+                    <div class="form-icon"><i class="fas fa-brain"></i></div>
+                    <h2 class="form-title">Add Muscle Head</h2>
+                </div>
+                <form method="POST">
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group"><label class="form-label" for="muscle_id">Select Muscle</label>
+                                <select class="form-select" id="muscle_id" name="muscle_id" required>
+                                    <option value="" disabled selected>Select a Muscle...</option>
+                                    <?php while ($m = mysqli_fetch_assoc($muscles)) { ?>
+                                        <option value="<?php echo $m['muscle_id']; ?>"><?php echo htmlspecialchars($m['muscle_name']); ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group"><label class="form-label" for="head_name">Head Name</label><input type="text" class="form-input" id="head_name" name="head_name" placeholder="e.g., Short Head" required></div>
+                        </div>
+                    </div>
+                    <div class="form-group"><label class="form-label" for="head_desc">Description</label><textarea class="form-textarea" id="head_desc" name="head_desc" placeholder="A brief description of the muscle head..."></textarea></div>
+                    <button type="submit" name="add_head" class="btn btn-block"><i class="fas fa-save"></i> Add Head</button>
+                </form>
+            </div>
+
+            <!-- EXERCISE FORM -->
+            <div class="form-card" id="exercise-form">
+                <div class="form-header">
+                    <div class="form-icon"><i class="fas fa-running"></i></div>
+                    <h2 class="form-title">Add Exercise</h2>
+                </div>
+                <form method="POST">
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group"><label class="form-label" for="head_id">Select Muscle Head</label>
+                                <select class="form-select" id="head_id" name="head_id" required>
+                                    <option value="" disabled selected>Select a Muscle Head...</option>
+                                    <?php mysqli_data_seek($heads, 0);
+                                    while ($h = mysqli_fetch_assoc($heads)) { ?>
+                                        <option value="<?php echo $h['head_id']; ?>"><?php echo htmlspecialchars($h['muscle_name']); ?> → <?php echo htmlspecialchars($h['head_name']); ?></option>
+                                    <?php } ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group"><label class="form-label" for="exercise_name">Exercise Name</label><input type="text" class="form-input" id="exercise_name" name="exercise_name" placeholder="e.g., Barbell Curl" required></div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group"><label class="form-label" for="equipment">Equipment</label><input type="text" class="form-input" id="equipment" name="equipment" placeholder="e.g., Barbell, Dumbbells"></div>
+                        </div>
+                        <div class="form-col">
+                            <div class="form-group"><label class="form-label" for="difficulty">Difficulty</label>
+                                <select class="form-select" id="difficulty" name="difficulty">
+                                    <option value="Beginner">Beginner</option>
+                                    <option value="Intermediate">Intermediate</option>
+                                    <option value="Advanced">Advanced</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-col">
+                            <div class="form-group"><label class="form-label" for="sets_reps">Sets x Reps</label><input type="text" class="form-input" id="sets_reps" name="sets_reps" placeholder="e.g., 3 x 12"></div>
+                        </div>
+                    </div>
+                    <button type="submit" name="add_exercise" class="btn btn-block"><i class="fas fa-save"></i> Add Exercise</button>
+                </form>
+            </div>
+        </main>
+
+    <!-- Exercise Detail Modal -->
     <div id="exerciseModal" class="exercise-modal">
         <div class="modal-content">
             <div class="modal-header">
-
                 <div class="carousel-container">
                     <div class="carousel-slide active">
-                        <?php if (!empty($data['muscle_image'])): ?>
-                            <img src="./uploads/<?php echo $data['muscle_image']; ?>" alt="Muscle Image">
-                        <?php endif; ?>
+                        <img id="modal-muscle-image" src="" alt="Muscle Image">
                     </div>
                 </div>
-
-                <button class="modal-close" onclick="closeExerciseModal()">
-                    <span class="material-symbols-rounded">close</span>
-                </button>
+                <button class="modal-close" onclick="closeExerciseModal()"><span class="material-symbols-rounded">close</span></button>
             </div>
-
             <div class="modal-body">
                 <div class="exercise-title-section">
-                    <h2 class="exercise-main-title">
-                        <?php echo htmlspecialchars($data['exercise_name']); ?>
-                    </h2>
-
+                    <h2 class="exercise-main-title" id="modal-exercise-name"></h2>
                     <div class="exercise-subtitle">
-                        <span class="exercise-tag">
-                            <span class="material-symbols-rounded" style="font-size:20px;">fitness_center</span>
-                            <?php echo htmlspecialchars($data['equipment']); ?>
-                        </span>
-
-                        <span class="exercise-tag">
-                            <span class="material-symbols-rounded" style="font-size:20px;">local_fire_department</span>
-                            <?php echo htmlspecialchars($data['muscle_name'] . " – " . $data['head_name']); ?>
-                        </span>
-
-                        <span class="exercise-tag">
-                            <span class="material-symbols-rounded" style="font-size:20px;">signal_cellular_alt</span>
-                            <?php echo htmlspecialchars($data['difficulty']); ?>
-                        </span>
+                        <span class="exercise-tag"><span class="material-symbols-rounded">fitness_center</span><span id="modal-equipment"></span></span>
+                        <span class="exercise-tag"><span class="material-symbols-rounded">local_fire_department</span><span id="modal-muscle-head"></span></span>
+                        <span class="exercise-tag"><span class="material-symbols-rounded">signal_cellular_alt</span><span id="modal-difficulty"></span></span>
                     </div>
-
-                    <p class="exercise-description">
-                        <?php echo nl2br(htmlspecialchars($data['head_description'])); ?>
-                    </p>
+                    <p class="exercise-description" id="modal-description"></p>
                 </div>
-
                 <div class="exercise-section">
-                    <h3 class="section-title">
-                        <span class="material-symbols-rounded section-icon">format_list_numbered</span>
-                        Step-by-Step Instructions
-                    </h3>
-                    <ul class="instruction-list">
-                        <li class="instruction-item">
-                            <span class="instruction-number">1</span>
-                            <span class="instruction-text">Example instruction 1</span>
-                        </li>
-                        <li class="instruction-item">
-                            <span class="instruction-number">2</span>
-                            <span class="instruction-text">Example instruction 2</span>
-                        </li>
+                    <h3 class="section-title"><span class="material-symbols-rounded section-icon">format_list_numbered</span>Step-by-Step Instructions</h3>
+                    <ul class="instruction-list" id="modal-instructions">
+                        <!-- Instructions will be populated by JS -->
                     </ul>
                 </div>
-
             </div>
         </div>
     </div>
 
-    <script>
-        function openExerciseModal() {
-            document.getElementById('exerciseModal').classList.add('active');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function closeExerciseModal() {
-            document.getElementById('exerciseModal').classList.remove('active');
-            document.body.style.overflow = 'auto';
-        }
-
-        document.addEventListener('keydown', e => {
-            if (e.key === 'Escape') closeExerciseModal();
-        });
-
-        document.getElementById('exerciseModal').addEventListener('click', e => {
-            if (e.target.id === 'exerciseModal') closeExerciseModal();
-        });
-    </script>
-    <!-- Detial Page Start -->
-
-</body>
-</html>
+<?php include "./include/footer.php" ?>
