@@ -17,6 +17,7 @@
                 switchTab(link.getAttribute('data-tab'));
             }));
 
+
             // Theme Toggle
             const themeToggle = document.getElementById('theme-toggle'),
                 themeIcon = document.getElementById('theme-icon'),
@@ -37,38 +38,85 @@
                 }
             });
 
+
             // Modal functionality
             window.openExerciseModal = function(exerciseId) {
                 const modal = document.getElementById('exerciseModal');
                 fetch(`?get_exercise_details&exercise_id=${exerciseId}`)
                     .then(response => response.json())
+
+                    // .then(data => {
+                    //     if (data.error) {
+                    //         alert(data.error);
+                    //         return;
+                    //     }
+                    //     document.getElementById('modal-exercise-name').innerText = data.exercise_name || 'N/A';
+                    //     document.getElementById('modal-equipment').innerText = data.equipment || 'N/A';
+                    //     document.getElementById('modal-muscle-head').innerText = `${data.muscle_name || 'N/A'} – ${data.head_name || 'N/A'}`;
+                    //     document.getElementById('modal-difficulty').innerText = data.difficulty || 'N/A';
+                    //     document.getElementById('modal-description').innerText = data.head_description || 'No description available.';
+                    //     const imgElement = document.getElementById('modal-muscle-image');
+                    //     if (data.muscle_image) {
+                    //         imgElement.src = `./uploads/${data.muscle_image}`;
+                    //     } else {
+                    //         imgElement.style.display = 'none';
+                    //     }
+                    //     const instructionsList = document.getElementById('modal-instructions');
+                    //     instructionsList.innerHTML = '';
+                    //     const exampleInstructions = [
+                    //         "Step 1: Prepare your equipment.",
+                    //         "Step 2: Get into the starting position.",
+                    //         "Step 3: Perform the main movement.",
+                    //         "Step 4: Return to the starting position."
+                    //     ];
+                    //     exampleInstructions.forEach((text, index) => {
+                    //         const li = document.createElement('li');
+                    //         li.className = 'instruction-item';
+                    //         li.innerHTML = `<span class="instruction-number">${index + 1}</span><span class="instruction-text">${text}</span>`;
+                    //         instructionsList.appendChild(li);
+                    //     });
+                    //     modal.style.display = 'flex';
+                    // })
+
+
                     .then(data => {
-                        if (data.error) {
-                            alert(data.error);
-                            return;
-                        }
-                        document.getElementById('modal-exercise-name').innerText = data.exercise_name || 'N/A';
-                        document.getElementById('modal-equipment').innerText = data.equipment || 'N/A';
-                        document.getElementById('modal-muscle-head').innerText = `${data.muscle_name || 'N/A'} – ${data.head_name || 'N/A'}`;
-                        document.getElementById('modal-difficulty').innerText = data.difficulty || 'N/A';
-                        document.getElementById('modal-description').innerText = data.head_description || 'No description available.';
-                        const imgElement = document.getElementById('modal-muscle-image');
-                        if (data.muscle_image) {
-                            imgElement.src = `./uploads/${data.muscle_image}`;
-                        } else {
-                            imgElement.style.display = 'none';
-                        }
-                        const instructionsList = document.getElementById('modal-instructions');
-                        instructionsList.innerHTML = '';
-                        const exampleInstructions = ["Step 1: Prepare your equipment.", "Step 2: Get into the starting position.", "Step 3: Perform the main movement.", "Step 4: Return to the starting position."];
-                        exampleInstructions.forEach((text, index) => {
-                            const li = document.createElement('li');
-                            li.className = 'instruction-item';
-                            li.innerHTML = `<span class="instruction-number">${index + 1}</span><span class="instruction-text">${text}</span>`;
-                            instructionsList.appendChild(li);
-                        });
-                        modal.style.display = 'flex';
-                    })
+    if (data.error) {
+        alert(data.error);
+        return;
+    }
+
+    // Fill modal fields
+    document.getElementById('modal-exercise-name').innerText = data.exercise_name || 'N/A';
+    document.getElementById('modal-equipment').innerText = data.equipment || 'N/A';
+    document.getElementById('modal-muscle-head').innerText = `${data.muscle_name || 'N/A'} – ${data.head_name || 'N/A'}`;
+    document.getElementById('modal-difficulty').innerText = data.difficulty || 'N/A';
+    document.getElementById('modal-description').innerText = data.head_description || 'No description available.';
+    const imgElement = document.getElementById('modal-muscle-image');
+    if (data.muscle_image) {
+        imgElement.src = `./uploads/${data.muscle_image}`;
+        imgElement.style.display = 'block';
+    } else {
+        imgElement.style.display = 'none';
+    }
+
+    // Fill instructions dynamically
+    const instructionsList = document.getElementById('modal-instructions');
+    instructionsList.innerHTML = '';
+    if (data.instructions && data.instructions.length) {
+        data.instructions.forEach((text, index) => {
+            const li = document.createElement('li');
+            li.className = 'instruction-item';
+            li.innerHTML = `<span class="instruction-number">${index + 1}</span><span class="instruction-text">${text}</span>`;
+            instructionsList.appendChild(li);
+        });
+    } else {
+        instructionsList.innerHTML = '<li>No instructions available.</li>';
+    }
+
+    modal.style.display = 'flex';
+})
+
+
                     .catch(error => console.error('Error fetching exercise details:', error));
             };
             window.closeExerciseModal = function() {

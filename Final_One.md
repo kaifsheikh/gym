@@ -1197,4 +1197,14 @@ CREATE TABLE exercises (
     FOREIGN KEY (head_id) REFERENCES muscle_heads(head_id) ON DELETE CASCADE
 );
 
+-- New
+
+CREATE TABLE exercise_instructions (
+    instruction_id INT AUTO_INCREMENT PRIMARY KEY,
+    exercise_id INT NOT NULL,
+    step_number INT NOT NULL,
+    instruction_text TEXT NOT NULL,
+    FOREIGN KEY (exercise_id) REFERENCES exercises(exercise_id) ON DELETE CASCADE
+);
+
 ```
